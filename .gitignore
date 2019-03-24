@@ -1,0 +1,8 @@
+# ignore everything
+*
+
+# include only files needed to build and run program
+!*.cs
+!*.csproj
+!*.sln
+!*.png

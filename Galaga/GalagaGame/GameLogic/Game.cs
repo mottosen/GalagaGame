@@ -44,7 +44,8 @@ namespace Galaga_Exercise_3 {
                 while (gameTimer.ShouldUpdate()) {
                     win.PollEvents();
                     
-                    GalagaBus.GetBus().ProcessEvents();
+                    // TODO: change processor back from sequentially
+                    GalagaBus.GetBus().ProcessEventsSequentially();
                     stateMachine.ActiveState.UpdateGameLogic();
                 }
                 

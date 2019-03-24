@@ -41,7 +41,6 @@ namespace Galaga_Exercise_3 {
         }
 
         private void LoseLife() {
-            Console.WriteLine(lives);
             lives--;
             if (lives < 0) {
                 Die();
@@ -49,6 +48,9 @@ namespace Galaga_Exercise_3 {
         }
 
         private void Die() {
+            // TODO: make the following lines work, problem with the eventhandling with old entities
+            //GalagaBus.GetBus().BreakProcessing();
+            //GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, this);
             GalagaBus.GetBus().RegisterEvent(
                 GameEventFactory<object>.CreateGameEventForAllProcessors(
                     GameEventType.GameStateEvent,

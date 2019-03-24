@@ -30,6 +30,10 @@ namespace Galaga_Exercise_3.GalagaStates {
         
         // Player
         private Player player;
+        private Entity playerLife1;
+        private Entity playerLife2;
+        private Entity playerLife3;
+        private List<Entity> playerLives = new List<Entity>();
         
         // Smooth Movement
         private bool rightKeyDown;
@@ -42,11 +46,7 @@ namespace Galaga_Exercise_3.GalagaStates {
         // Score
         public Score Score { get; private set; }
 
-        public void GameLoop() {
-            throw new System.NotImplementedException();
-        }
-
-        public void InitializeGameState() {
+        public GameRunning() {
             backGroundImage = new Entity(
                 new StationaryShape(new Vec2F(0, 0), new Vec2F(1, 1)), 
                 new Image(Path.Combine("Assets", "Images", "SpaceBackground.png")));
@@ -55,6 +55,20 @@ namespace Galaga_Exercise_3.GalagaStates {
             player = new Player(
                 new DynamicShape(new Vec2F(0.45f, 0.1f), new Vec2F(0.1f, 0.1f)),
                 new Image(Path.Combine("Assets", "Images", "Player.png")));
+            playerLife1 = new Entity(
+                new StationaryShape(new Vec2F(0.01f, 0.94f), new Vec2F(0.05f, 0.05f)), 
+                new Image(Path.Combine("Assets", "Images", "Player.png")));
+            playerLife2 = new Entity(
+                new StationaryShape(new Vec2F(0.06f, 0.94f), new Vec2F(0.05f, 0.05f)), 
+                new Image(Path.Combine("Assets", "Images", "Player.png")));
+            playerLife3 = new Entity(
+                new StationaryShape(new Vec2F(0.11f, 0.94f), new Vec2F(0.05f, 0.05f)), 
+                new Image(Path.Combine("Assets", "Images", "Player.png")));
+            playerLives = new List<Entity>() {
+                playerLife1,
+                playerLife2,
+                playerLife3
+            };
             
             // Shots
             shotStride =
@@ -82,7 +96,15 @@ namespace Galaga_Exercise_3.GalagaStates {
             explosions = new AnimationContainer(8);
 
             // Score
-            Score = new Score(new Vec2F(0.0f, -0.12f), new Vec2F(0.2f, 0.2f));
+            Score = new Score(new Vec2F(0.0f, -0.923f), new Vec2F(1f, 1f));
+        }
+
+        public void GameLoop() {
+            throw new System.NotImplementedException();
+        }
+
+        public void InitializeGameState() {
+            
         }
 
         public void UpdateGameLogic() {
@@ -100,6 +122,10 @@ namespace Galaga_Exercise_3.GalagaStates {
             foreach (PlayerShot shot in playerShots) {
                 shot.Image = shotStride;
                 shot.RenderEntity();
+            }
+
+            foreach (Entity playerLife in playerLives) {
+                playerLife.RenderEntity();
             }
 
             explosions.RenderAnimations();
@@ -137,6 +163,17 @@ namespace Galaga_Exercise_3.GalagaStates {
                     break;
                 case "KEY_SPACE":
                     AddShot();
+                    break;
+                case "KEY_F":
+                    GalagaBus.GetBus().RegisterEvent(
+                        GameEventFactory<object>.CreateGameEventForAllProcessors(
+                            GameEventType.PlayerEvent, 
+                            this, 
+                            "LOSE_LIFE", 
+                            "", ""));
+                    if (playerLives.Count > 0) {
+                        playerLives.RemoveAt(playerLives.Count - 1);
+                    }
                     break;
                 }
             } else if (keyAction == "KEY_RELEASE") {
@@ -177,8 +214,6 @@ namespace Galaga_Exercise_3.GalagaStates {
                                 "NONE", ""));
                     }
                     break;
-                case "KEY_SPACE":
-                    break;
                 }
             }
         }
@@ -189,8 +224,25 @@ namespace Galaga_Exercise_3.GalagaStates {
                 AddEnemies();
             }
             movementStrategy.MoveEnemies(enemies);
+            CheckCrash();
         }
-        
+
+        private void CheckCrash() {
+            enemies.Iterate(delegate(Enemy enemy) {
+                if (CollisionDetection.Aabb(player.Shape.AsDynamicShape(), enemy.Shape).Collision) {
+                    GalagaBus.GetBus().RegisterEvent(
+                        GameEventFactory<object>.CreateGameEventForAllProcessors(
+                            GameEventType.PlayerEvent, 
+                            this, 
+                            "LOSE_LIFE", 
+                            "", ""));
+                    if (playerLives.Count > 0) {
+                        playerLives.RemoveAt(playerLives.Count - 1);
+                    }
+                }
+            });
+        }
+
         public void AddEnemies() {
             ISquadron newSquadron = squadrons[rand.Next(squadrons.Count)];
             movementStrategy = movementStrategies[rand.Next(movementStrategies.Count)];
@@ -217,7 +269,7 @@ namespace Galaga_Exercise_3.GalagaStates {
 
                 foreach (Enemy enemy in enemies) {
                     CollisionData collision =
-                        CollisionDetection.Aabb(shot.Shape.AsDynamicShape(), enemy.Shape);
+                        CollisionDetection.Aabb(shot.Shape.AsDynamicShape(), enemy.Shape.AsDynamicShape());
                     if (collision.Collision && !shot.IsDeleted()) {
                         AddExplosion(enemy.Shape.Position.X, enemy.Shape.Position.Y,
                             enemy.Shape.Extent.X, enemy.Shape.Extent.Y);

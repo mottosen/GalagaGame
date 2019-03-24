@@ -1,3 +1,4 @@
+using System;
 using DIKUArcade.Entities;
 using DIKUArcade.EventBus;
 using DIKUArcade.Graphics;
@@ -6,10 +7,11 @@ using DIKUArcade.Math;
 namespace Galaga_Exercise_3 {
     public class Player : Entity, IGameEventProcessor<object> {
         private Vec2F direction = new Vec2F();
+        private int lives;
 
         public Player(DynamicShape shape, IBaseImage image) : base(shape, image) {
             GalagaBus.GetBus().Subscribe(GameEventType.PlayerEvent, this);
-
+            lives = 3;
         }
 
         public void ProcessEvent(GameEventType eventType, GameEvent<object> gameEvent) {
@@ -31,8 +33,28 @@ namespace Galaga_Exercise_3 {
                 case "SHOOT":
                     Shoot();
                     break;
+                case "LOSE_LIFE":
+                    LoseLife();
+                    break;
                 }
             }
+        }
+
+        private void LoseLife() {
+            Console.WriteLine(lives);
+            lives--;
+            if (lives < 0) {
+                Die();
+            }
+        }
+
+        private void Die() {
+            GalagaBus.GetBus().RegisterEvent(
+                GameEventFactory<object>.CreateGameEventForAllProcessors(
+                    GameEventType.GameStateEvent,
+                    this,
+                    "CHANGE_STATE",
+                    "GAME_OVER", ""));
         }
 
         private void Direction(Vec2F dir) {

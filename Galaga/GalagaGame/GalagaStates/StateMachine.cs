@@ -15,13 +15,16 @@ namespace Galaga_Exercise_3.GalagaStates {
             switch (stateType) {
             case (GameStateType.GameRunning):
                 ActiveState = new GameRunning();
+                currentGame = ActiveState;
                 break;
             case (GameStateType.GamePaused):
-                currentGame = ActiveState;
                 ActiveState = new GamePaused(currentGame);
                 break;
             case (GameStateType.MainMenu):
                 ActiveState = MainMenu.GetInstance();
+                break;
+            case (GameStateType.GameOver):
+                ActiveState = new GameOver(currentGame);
                 break;
             }
             ActiveState.InitializeGameState();

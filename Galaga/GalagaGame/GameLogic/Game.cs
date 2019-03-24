@@ -21,7 +21,7 @@ namespace Galaga_Exercise_3 {
 
         public Game() {
             win = new Window("Film", 500, 500);
-            gameTimer = new GameTimer(60, 144);
+            gameTimer = new GameTimer(60, 60);
 
             GalagaBus.GetBus().InitializeEventBus(new List<GameEventType> {
                 GameEventType.InputEvent,

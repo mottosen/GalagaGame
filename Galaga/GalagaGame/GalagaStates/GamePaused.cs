@@ -80,6 +80,7 @@ namespace Galaga_Exercise_3.GalagaStates {
                     ChangeButton(-1);
                     break;
                 case ("KEY_ENTER"):
+                case ("KEY_SPACE"):
                     if (activeMenuButton == 0) {
                         Continue();
                     } else {

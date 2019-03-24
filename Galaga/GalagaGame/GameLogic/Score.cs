@@ -11,7 +11,7 @@ namespace Galaga_Exercise_3 {
             score = 0;
             display = new Text(score.ToString(), position, extent);
             display.SetColor(Color.Aqua);
-            display.SetFontSize(120);
+            display.SetFontSize(25);
         }
 
         public void AddPoint() {
@@ -26,7 +26,11 @@ namespace Galaga_Exercise_3 {
             display.SetText(string.Format("{0}", score.ToString()));
             display.RenderText();
         }
-        
+
+        public int GetScore() {
+            return score;
+        }
+
         public bool TrueVictory() {
             return score == 42;
         }

@@ -42,15 +42,17 @@ namespace Galaga_Exercise_3 {
 
         private void LoseLife() {
             lives--;
+        }
+
+        public void Update() {
             if (lives < 0) {
                 Die();
             }
+            Move();
         }
-
+        
         private void Die() {
-            // TODO: make the following lines work, problem with the eventhandling with old entities
-            //GalagaBus.GetBus().BreakProcessing();
-            //GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, this);
+            GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, this);
             GalagaBus.GetBus().RegisterEvent(
                 GameEventFactory<object>.CreateGameEventForAllProcessors(
                     GameEventType.GameStateEvent,
@@ -58,13 +60,13 @@ namespace Galaga_Exercise_3 {
                     "CHANGE_STATE",
                     "GAME_OVER", ""));
         }
-
+        
         private void Direction(Vec2F dir) {
             direction = dir;
             Shape.AsDynamicShape().ChangeDirection(dir);
         }
 
-        public void Move() {
+        private void Move() {
             var destination = Shape.Position + direction;
             if (destination.X > 0 && destination.X + Shape.Extent.X < 1) {
                 Shape.Move();

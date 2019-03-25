@@ -108,9 +108,9 @@ namespace Galaga_Exercise_3.GalagaStates {
         }
 
         public void UpdateGameLogic() {
-            player.Move();
-            IterateShots();
-            HandleEnemies();
+            UpdatePlayer();
+            UpdateShots();
+            UpdateEnemies();
             Score.AddPoint();
         }
 
@@ -217,19 +217,81 @@ namespace Galaga_Exercise_3.GalagaStates {
                 }
             }
         }
+
+        private void UpdatePlayer() {
+            player.Update();
+        }
+
+        private void UpdateShots() {
+            List<PlayerShot> newPlayerShots = new List<PlayerShot>();
+            foreach (PlayerShot shot in playerShots) {
+                if (!shot.IsDeleted()) {
+                    shot.Move();
+                    newPlayerShots.Add(shot);
+                } 
+
+                foreach (Enemy enemy in enemies) {
+                    CollisionData collision =
+                        CollisionDetection.Aabb(shot.Shape.AsDynamicShape(), enemy.Shape.AsDynamicShape());
+                    if (collision.Collision && !shot.IsDeleted()) {
+                        Score.AddPoint(1000);
+                        shot.DeleteEntity();
+                        enemy.DeleteEntity();
+                        AddExplosion(enemy.Shape.Position.X, enemy.Shape.Position.Y,
+                            enemy.Shape.Extent.X, enemy.Shape.Extent.Y);
+                    }
+                }
+            }
+            
+            playerShots = newPlayerShots;
+        }
         
-        private void HandleEnemies() {
+        private void UpdateEnemies() {
+            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
+            foreach (Enemy enemy in enemies) {
+                if (!enemy.IsDeleted()) {
+                    newEnemies.AddDynamicEntity(enemy);
+                }
+            }
+
+            enemies = newEnemies;
+            
             if (enemies.CountEntities() == 0) {
                 playerShots = new List<PlayerShot>();
                 AddEnemies();
             }
+            
             movementStrategy.MoveEnemies(enemies);
-            CheckCrash();
+            EnemyCollision();
         }
 
-        private void CheckCrash() {
+        public void AddEnemies() {
+            ISquadron newSquadron = squadrons[rand.Next(squadrons.Count)];
+            movementStrategy = movementStrategies[rand.Next(movementStrategies.Count)];
+            foreach (Enemy enemy in newSquadron.Enemies) {
+                enemies.AddDynamicEntity(enemy);
+            }
+            newSquadron.Enemies.ClearContainer();
+            newSquadron.CreateEnemies(enemyStrides);
+        }
+        
+        private void EnemyCollision() {
             enemies.Iterate(delegate(Enemy enemy) {
                 if (CollisionDetection.Aabb(player.Shape.AsDynamicShape(), enemy.Shape).Collision) {
+                    enemy.DeleteEntity();
+                    GalagaBus.GetBus().RegisterEvent(
+                        GameEventFactory<object>.CreateGameEventForAllProcessors(
+                            GameEventType.PlayerEvent, 
+                            this, 
+                            "LOSE_LIFE", 
+                            "", ""));
+                    if (playerLives.Count > 0) {
+                        playerLives.RemoveAt(playerLives.Count - 1);
+                    }
+                }
+
+                if (enemy.Shape.Position.Y + enemy.Shape.Extent.Y <= 0.0f) {
+                    enemy.DeleteEntity();
                     GalagaBus.GetBus().RegisterEvent(
                         GameEventFactory<object>.CreateGameEventForAllProcessors(
                             GameEventType.PlayerEvent, 
@@ -243,52 +305,13 @@ namespace Galaga_Exercise_3.GalagaStates {
             });
         }
 
-        public void AddEnemies() {
-            ISquadron newSquadron = squadrons[rand.Next(squadrons.Count)];
-            movementStrategy = movementStrategies[rand.Next(movementStrategies.Count)];
-            foreach (Enemy enemy in newSquadron.Enemies) {
-                enemies.AddDynamicEntity(enemy);
-            }
-            newSquadron.Enemies.ClearContainer();
-            newSquadron.CreateEnemies(enemyStrides);
-        }
-        
         public void AddShot() {
             PlayerShot shot = new PlayerShot(
-                new DynamicShape(player.GetCannonPoint(), new Vec2F(0.008F, 0.027F)), shotStride);
+                new DynamicShape(
+                    player.GetCannonPoint(), 
+                    new Vec2F(0.008F, 0.027F)), 
+                    shotStride);
             playerShots.Add(shot);
-        }
-
-        public void IterateShots() {
-            List<PlayerShot> newPlayerShots = new List<PlayerShot>();
-            foreach (PlayerShot shot in playerShots) {
-                if (!shot.IsDeleted()) {
-                    shot.Move();
-                    newPlayerShots.Add(shot);
-                }
-
-                foreach (Enemy enemy in enemies) {
-                    CollisionData collision =
-                        CollisionDetection.Aabb(shot.Shape.AsDynamicShape(), enemy.Shape.AsDynamicShape());
-                    if (collision.Collision && !shot.IsDeleted()) {
-                        AddExplosion(enemy.Shape.Position.X, enemy.Shape.Position.Y,
-                            enemy.Shape.Extent.X, enemy.Shape.Extent.Y);
-                        Score.AddPoint(1000);
-                        shot.DeleteEntity();
-                        enemy.DeleteEntity();
-                    }
-                }
-            }
-
-            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
-            foreach (Enemy enemy in enemies) {
-                if (!enemy.IsDeleted()) {
-                    newEnemies.AddDynamicEntity(enemy);
-                }
-            }
-
-            enemies = newEnemies;
-            playerShots = newPlayerShots;
         }
 
         public void AddExplosion(float posX, float posY, float extentX, float extentY) {

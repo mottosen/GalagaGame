@@ -21,7 +21,7 @@ namespace Galaga_Exercise_3 {
 
         public Game() {
             win = new Window("Film", 500, 500);
-            gameTimer = new GameTimer(60, 60);
+            gameTimer = new GameTimer(60, 144);
 
             GalagaBus.GetBus().InitializeEventBus(new List<GameEventType> {
                 GameEventType.InputEvent,
@@ -44,8 +44,7 @@ namespace Galaga_Exercise_3 {
                 while (gameTimer.ShouldUpdate()) {
                     win.PollEvents();
                     
-                    // TODO: change processor back from sequentially
-                    GalagaBus.GetBus().ProcessEventsSequentially();
+                    GalagaBus.GetBus().ProcessEvents();
                     stateMachine.ActiveState.UpdateGameLogic();
                 }
                 

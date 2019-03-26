@@ -1,15 +1,20 @@
 using System;
+using System.IO;
 using DIKUArcade.Entities;
 using DIKUArcade.EventBus;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 
-namespace Galaga_Exercise_3 {
+namespace GalagaGame {
     public class Player : Entity, IGameEventProcessor<object> {
         private Vec2F direction = new Vec2F();
         private int lives;
+        private int moveDirection;
 
-        public Player(DynamicShape shape, IBaseImage image) : base(shape, image) {
+        private static Image stride =
+            ImageStride.CreateStrides(1, Path.Combine("Assets", "Images", "Player.png"))[0];
+
+        public Player(DynamicShape shape) : base(shape, Player.stride) {
             GalagaBus.GetBus().Subscribe(GameEventType.PlayerEvent, this);
             lives = 3;
         }
@@ -20,15 +25,13 @@ namespace Galaga_Exercise_3 {
                 case "SET_DIRECTION":
                     switch (gameEvent.Parameter1) {
                     case "LEFT":
-                        Direction(new Vec2F(-0.01f, 0.0f));
+                        moveDirection--;
                         break;
                     case "RIGHT":
-                        Direction(new Vec2F(0.01f, 0.0f));
-                        break;
-                    case "NONE":
-                        Direction(new Vec2F(0, 0));
+                        moveDirection++;
                         break;
                     }
+                    Direction(new Vec2F(moveDirection * 0.01f, 0));
                     break;
                 case "SHOOT":
                     Shoot();
@@ -43,7 +46,7 @@ namespace Galaga_Exercise_3 {
         private void LoseLife() {
             lives--;
         }
-
+        
         public void Update() {
             if (lives < 0) {
                 Die();

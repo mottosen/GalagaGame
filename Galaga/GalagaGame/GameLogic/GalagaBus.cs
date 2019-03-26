@@ -1,6 +1,6 @@
 using DIKUArcade.EventBus;
 
-namespace Galaga_Exercise_3 {
+namespace GalagaGame {
     public static class GalagaBus {
         private static GameEventBus<object> eventBus;
 

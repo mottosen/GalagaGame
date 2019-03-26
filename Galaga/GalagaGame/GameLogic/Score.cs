@@ -1,19 +1,28 @@
+using System.Diagnostics;
 using System.Drawing;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 
-namespace Galaga_Exercise_3 {
+namespace GalagaGame {
     public class Score {
+        private static Score instance;
         private Text display;
         private int score;
 
-        public Score(Vec2F position, Vec2F extent) {
+        public Score() {
             score = 0;
-            display = new Text(score.ToString(), position, extent);
-            display.SetColor(Color.Aqua);
+            display = new Text(
+                score.ToString(), 
+                new Vec2F(0.0f, -0.923f), 
+                new Vec2F(1f, 1f));
+            display.SetColor(Color.WhiteSmoke);
             display.SetFontSize(25);
         }
 
+        public static Score GetInstance() {
+            return Score.instance ?? (Score.instance = new Score());
+        }
+        
         public void AddPoint() {
             score++;
         }
@@ -29,6 +38,10 @@ namespace Galaga_Exercise_3 {
 
         public int GetScore() {
             return score;
+        }
+
+        public void ResetScore() {
+            score = 0;
         }
 
         public bool TrueVictory() {

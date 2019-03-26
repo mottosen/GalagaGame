@@ -8,7 +8,7 @@ using DIKUArcade.Math;
 using DIKUArcade.State;
 using Image = DIKUArcade.Graphics.Image;
 
-namespace Galaga_Exercise_3.GalagaStates {
+namespace GalagaGame.GalagaStates {
     public class MainMenu : IGameState {
         private static MainMenu instance = null;
 
@@ -135,7 +135,7 @@ namespace Galaga_Exercise_3.GalagaStates {
                         "The found highscore could not be casted to a double.");
                 }
             }
-            highscoreText.SetText(string.Format("{0}", highscore));
+            highscoreText.SetText(string.Format("Highscore: {0}", highscore));
         }
     }
 }

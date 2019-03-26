@@ -1,4 +1,4 @@
-﻿namespace Galaga_Exercise_3 {
+﻿namespace GalagaGame {
     internal class Program {
         public static void Main(string[] args) {
             var game = new Game();

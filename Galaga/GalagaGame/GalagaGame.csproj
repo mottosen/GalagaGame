@@ -39,9 +39,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\BossEnemy.cs" />
     <Compile Include="Entities\Enemy.cs" />
+    <Compile Include="Entities\LifeBar.cs" />
+    <Compile Include="Entities\NormalEnemy.cs" />
     <Compile Include="Entities\Player.cs" />
+    <Compile Include="Entities\PlayerLife.cs" />
     <Compile Include="Entities\PlayerShot.cs" />
+    <Compile Include="Entities\StrongEnemy.cs" />
     <Compile Include="GalagaStates\GameOver.cs" />
     <Compile Include="GalagaStates\GamePaused.cs" />
     <Compile Include="GalagaStates\GameRunning.cs" />
@@ -51,6 +56,8 @@
     <Compile Include="GameLogic\GalagaBus.cs" />
     <Compile Include="GameLogic\Game.cs" />
     <Compile Include="GameLogic\Score.cs" />
+    <Compile Include="Levels\LevelAbstract.cs" />
+    <Compile Include="Levels\Level_1.cs" />
     <Compile Include="MovementStrategies\IMovementStrategy.cs" />
     <Compile Include="MovementStrategies\MovementStrategies.cs" />
     <Compile Include="Program.cs" />

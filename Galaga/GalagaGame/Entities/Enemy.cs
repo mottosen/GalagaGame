@@ -2,12 +2,22 @@ using DIKUArcade.Entities;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 
-namespace Galaga_Exercise_3 {
+namespace GalagaGame {
     public class Enemy : Entity {
+        protected int lives;
+        public int Points { get; protected set; }
+        public Vec2F StartingPosition { get; }
+
         public Enemy(DynamicShape shape, IBaseImage image) : base(shape, image) {
             StartingPosition = shape.Position;
         }
 
-        public Vec2F StartingPosition { get; }
+        public bool IsDestroyed() {
+            return lives <= 0;
+        }
+
+        public void Hit() {
+            lives--;
+        }
     }
 }

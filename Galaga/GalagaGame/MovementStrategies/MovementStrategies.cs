@@ -2,7 +2,7 @@ using System;
 using DIKUArcade.Entities;
 using DIKUArcade.Math;
 
-namespace Galaga_Exercise_3.MovementStrategies {
+namespace GalagaGame.MovementStrategies {
     public class MovementStrategyNoMove : IMovementStrategy {
         public void MoveEnemy(Enemy enemy) { }
 

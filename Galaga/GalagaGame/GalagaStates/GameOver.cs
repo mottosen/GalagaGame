@@ -7,9 +7,10 @@ using DIKUArcade.EventBus;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 using DIKUArcade.State;
+using GalagaGame.Levels;
 using Image = DIKUArcade.Graphics.Image;
 
-namespace Galaga_Exercise_3.GalagaStates {
+namespace GalagaGame.GalagaStates {
     public class GameOver : IGameState {
         private Text[] menuButtons = {
             new Text(
@@ -40,9 +41,9 @@ namespace Galaga_Exercise_3.GalagaStates {
         private int maxMenuButtons;
         private double score;
 
-        public GameOver(IGameState aCurrentGame) {
+        public GameOver(GameRunning aCurrentGame) {
             maxMenuButtons = menuButtons.Length;
-            score = ((GameRunning)aCurrentGame).Score.GetScore();
+            score = Score.GetInstance().GetScore();
         }
 
         public void GameLoop() {

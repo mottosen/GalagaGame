@@ -6,9 +6,10 @@ using DIKUArcade.EventBus;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 using DIKUArcade.State;
+using GalagaGame.Levels;
 using Image = DIKUArcade.Graphics.Image;
 
-namespace Galaga_Exercise_3.GalagaStates {
+namespace GalagaGame.GalagaStates {
     public class GamePaused : IGameState{
         private IGameState currentGame;
         
@@ -32,8 +33,8 @@ namespace Galaga_Exercise_3.GalagaStates {
         private int activeMenuButton;
         private int maxMenuButtons;
 
-        public GamePaused(IGameState aCurrentGame) {
-            if (((GameRunning)aCurrentGame).Score.TrueVictory()) {
+        public GamePaused(GameRunning aCurrentGame) {
+            if (Score.GetInstance().TrueVictory()) {
                 Console.WriteLine("ez win!");
             }
             currentGame = aCurrentGame;

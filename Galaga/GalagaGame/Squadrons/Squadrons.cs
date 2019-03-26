@@ -1,10 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Security.Cryptography;
 using DIKUArcade.Entities;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 
-namespace Galaga_Exercise_3.Squadrons {
+namespace GalagaGame.Squadrons {
     public class SquadronBox : ISquadron {
+        private int strongEnemyRatio;
+        private Random rand = new Random();
+        
         private List<Vec2F> positions = new List<Vec2F> {
             new Vec2F(0.25f, 0.9f),
             new Vec2F(0.25f, 0.8f),
@@ -23,29 +29,39 @@ namespace Galaga_Exercise_3.Squadrons {
             new Vec2F(0.65f, 0.7f)
         };
 
-
-        public SquadronBox(List<Image> aEnemyStrides) {
+        public SquadronBox(int ratio) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
+            // Ratio for choosing enemy strides
+            strongEnemyRatio = ratio;
+            
             // Instantiate the enemies.
-            CreateEnemies(aEnemyStrides);
+            CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
         public EntityContainer<Enemy> Enemies { get; }
 
-        public void CreateEnemies(List<Image> enemyStrides) {
+        public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
-                var enemy = new Enemy(
-                    new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)),
-                    new ImageStride(80, enemyStrides));
+                int randNum = rand.Next(100);
+                Enemy enemy;
+                if (strongEnemyRatio <= randNum) {
+                    enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                } else {
+                    enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                }
+                
                 Enemies.AddDynamicEntity(enemy);
             }
         }
     }
 
     public class SquadronLine : ISquadron {
+        private int strongEnemyRatio;
+        private Random rand = new Random();
+        
         private List<Vec2F> positions = new List<Vec2F> {
             new Vec2F(0.1f, 0.8f),
             new Vec2F(0.2f, 0.8f),
@@ -58,28 +74,39 @@ namespace Galaga_Exercise_3.Squadrons {
         };
 
 
-        public SquadronLine(List<Image> aEnemyStrides) {
+        public SquadronLine(int ratio) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
+            // Ratio for choosing enemy strides
+            strongEnemyRatio = ratio;
+            
             // Instantiate the enemies.
-            CreateEnemies(aEnemyStrides);
+            CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
         public EntityContainer<Enemy> Enemies { get; }
 
-        public void CreateEnemies(List<Image> enemyStrides) {
+        public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
-                var enemy = new Enemy(
-                    new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)),
-                    new ImageStride(80, enemyStrides));
+                int randNum = rand.Next(100);
+                Enemy enemy;
+                if (strongEnemyRatio <= randNum) {
+                    enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                } else {
+                    enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                }
+                
                 Enemies.AddDynamicEntity(enemy);
             }
         }
     }
 
     public class SquadronDiamonds : ISquadron {
+        private int strongEnemyRatio;
+        private Random rand = new Random();
+        
         private List<Vec2F> positions = new List<Vec2F> {
             //left
             new Vec2F(0.15f, 0.9f),
@@ -107,22 +134,30 @@ namespace Galaga_Exercise_3.Squadrons {
         };
 
 
-        public SquadronDiamonds(List<Image> aEnemyStrides) {
+        public SquadronDiamonds(int ratio) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
+            // Ratio for choosing enemy strides
+            strongEnemyRatio = ratio;
+            
             // Instantiate the enemies.
-            CreateEnemies(aEnemyStrides);
+            CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
         public EntityContainer<Enemy> Enemies { get; }
 
-        public void CreateEnemies(List<Image> enemyStrides) {
+        public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
-                var enemy = new Enemy(
-                    new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)),
-                    new ImageStride(80, enemyStrides));
+                int randNum = rand.Next(100);
+                Enemy enemy;
+                if (strongEnemyRatio <= randNum) {
+                    enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                } else {
+                    enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
+                }
+                
                 Enemies.AddDynamicEntity(enemy);
             }
         }

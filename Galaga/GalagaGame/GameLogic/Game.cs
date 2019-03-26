@@ -8,11 +8,11 @@ using DIKUArcade.Graphics;
 using DIKUArcade.Math;
 using DIKUArcade.Physics;
 using DIKUArcade.Timers;
-using Galaga_Exercise_3.GalagaStates;
-using Galaga_Exercise_3.MovementStrategies;
-using Galaga_Exercise_3.Squadrons;
+using GalagaGame.GalagaStates;
+using GalagaGame.MovementStrategies;
+using GalagaGame.Squadrons;
 
-namespace Galaga_Exercise_3 {
+namespace GalagaGame {
     public class Game : IGameEventProcessor<object> {
         // System
         private GameTimer gameTimer;

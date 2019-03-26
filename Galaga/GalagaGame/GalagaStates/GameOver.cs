@@ -11,10 +11,6 @@ using Image = DIKUArcade.Graphics.Image;
 
 namespace Galaga_Exercise_3.GalagaStates {
     public class GameOver : IGameState {
-        //private Entity buttonSelectImage = new Entity(
-        //    new StationaryShape(new Vec2F(0, 0), new Vec2F(0.01f, 0.05f)), 
-        //    new Image(Path.Combine("Assets", "Images", "BulletRed2.png")));
-        
         private Text[] menuButtons = {
             new Text(
                 "Restart", 
@@ -33,15 +29,19 @@ namespace Galaga_Exercise_3.GalagaStates {
         private Text scoreText = new Text("", 
             new Vec2F(0.3f, -0.0775f), 
             new Vec2F(0.6f, 0.6f));
+        
+        private Text highscoreText = new Text(
+            "",
+            new Vec2F(0f, 0f),
+            new Vec2F(1f, 0.9f));
 
         private Entity backGroundImage;
         private int activeMenuButton;
         private int maxMenuButtons;
-        private int score;
+        private double score;
 
         public GameOver(IGameState aCurrentGame) {
             maxMenuButtons = menuButtons.Length;
-            //buttonSelectImage.Shape.Rotate(0.5f * (float)Math.PI);
             score = ((GameRunning)aCurrentGame).Score.GetScore();
         }
 
@@ -56,6 +56,8 @@ namespace Galaga_Exercise_3.GalagaStates {
             gameOverText.SetColor(Color.YellowGreen);
             scoreText.SetText(string.Format("Score: {0}", score));
             scoreText.SetColor(Color.WhiteSmoke);
+            highscoreText.SetColor(Color.Red);
+            CheckHighscore();
         }
 
         public void UpdateGameLogic() {
@@ -68,15 +70,14 @@ namespace Galaga_Exercise_3.GalagaStates {
                 if (i == activeMenuButton) {
                     menuButtons[i].SetColor(Color.YellowGreen);
                     var pos = menuButtons[i].GetShape().Position;
-                    //buttonSelectImage.Shape.SetPosition(new Vec2F(pos.X - 0.03f, pos.Y + 0.4375f));
                 } else {
                     menuButtons[i].SetColor(Color.WhiteSmoke);
                 }
                 menuButtons[i].RenderText();
             }
-            //buttonSelectImage.RenderEntity();
             scoreText.RenderText();
             gameOverText.RenderText();
+            highscoreText.RenderText();
         }
 
         public void HandleKeyEvent(string keyValue, string keyAction) {
@@ -125,6 +126,30 @@ namespace Galaga_Exercise_3.GalagaStates {
                 activeMenuButton = maxMenuButtons - 1;
             } else if (activeMenuButton < 0) {
                 activeMenuButton = 0;
+            }
+        }
+
+        private void CheckHighscore() {
+            double oldHighscore;
+            using (StreamReader sr = File.OpenText(@"./../../highscore.txt")) {
+                string origin = sr.ReadLine();
+                
+                if (origin == null) {
+                    throw new FormatException(
+                        "Document empty.");
+                } else {
+                    if (!Double.TryParse(origin, out oldHighscore)) {
+                        throw new InvalidCastException(
+                            "The found highscore could not be casted to a double.");
+                    }
+                }
+            }
+            
+            if (score > oldHighscore) {
+                highscoreText.SetText("New Highscore!");
+                using (StreamWriter sw = File.CreateText(@"./../../highscore.txt")) {
+                    sw.WriteLine(string.Format("{0}", score));
+                }
             }
         }
     }

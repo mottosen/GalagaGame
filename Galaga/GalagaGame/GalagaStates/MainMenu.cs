@@ -28,6 +28,10 @@ namespace Galaga_Exercise_3.GalagaStates {
                 new Vec2F(0.1f, 0.0f), 
                 new Vec2F(0.5f, 0.5f))
         };
+        private Text highscoreText = new Text(
+            "Highscore not found.",
+            new Vec2F(0.01f,-0.01f),
+            new Vec2F(1f,1f));
         
         private int activeMenuButton;
         private int maxMenuButtons;
@@ -36,6 +40,8 @@ namespace Galaga_Exercise_3.GalagaStates {
             activeMenuButton = 0;
             maxMenuButtons = menuButtons.Length;
             buttonSelectImage.Shape.Rotate(0.5f * (float)Math.PI);
+            highscoreText.SetFontSize(15);
+            highscoreText.SetColor(Color.WhiteSmoke);
         }
 
         public static MainMenu GetInstance() {
@@ -47,7 +53,7 @@ namespace Galaga_Exercise_3.GalagaStates {
         }
 
         public void InitializeGameState() {
-            
+            GetHighscore();
         }
 
         public void UpdateGameLogic() {
@@ -67,6 +73,7 @@ namespace Galaga_Exercise_3.GalagaStates {
                 menuButtons[i].RenderText();
             }
             buttonSelectImage.RenderEntity();
+            highscoreText.RenderText();
         }
 
         public void HandleKeyEvent(string keyValue, string keyAction) {
@@ -117,6 +124,18 @@ namespace Galaga_Exercise_3.GalagaStates {
             } else if (activeMenuButton < 0) {
                 activeMenuButton = 0;
             }
+        }
+
+        private void GetHighscore() {
+            double highscore;
+            using (StreamReader sr = File.OpenText(@"./../../highscore.txt")) {
+                string origin = sr.ReadLine();
+                if (!double.TryParse(origin, out highscore)) {
+                    throw new InvalidCastException(
+                        "The found highscore could not be casted to a double.");
+                }
+            }
+            highscoreText.SetText(string.Format("{0}", highscore));
         }
     }
 }

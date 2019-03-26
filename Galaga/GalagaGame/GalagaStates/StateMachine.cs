@@ -9,6 +9,7 @@ namespace Galaga_Exercise_3.GalagaStates {
         
         public StateMachine() {
             ActiveState = MainMenu.GetInstance();
+            ActiveState.InitializeGameState();
         }
 
         private void SwitchState(GameStateType stateType) {

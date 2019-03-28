@@ -13,14 +13,21 @@ namespace GalagaGame.Levels {
     public abstract class LevelAbstract {
         private Entity backGroundImage;
         
-        protected Random Rand = new Random();
+        protected Random Rand = new Random(); 
 
         // Enemies
         protected double EnemySpeed;
         protected EntityContainer<Enemy> Enemies = new EntityContainer<Enemy>(0);
-        protected List<ISquadron> Squadrons = new List<ISquadron>();
         protected List<IMovementStrategy> MovementStrategies = new List<IMovementStrategy>();
         protected IMovementStrategy MovementStrategy = new MovementStrategyNoMove();
+
+        public enum SquadronType {
+            SquadronBox,
+            SquadronLine,
+            SquadronDiamonds
+        }
+        
+        protected SquadronType[] Squadrons = (SquadronType[])Enum.GetValues(typeof(SquadronType));
     
         // Explosions
         private List<Image> explosionStrides;
@@ -129,18 +136,25 @@ namespace GalagaGame.Levels {
         }
         
         public void AddEnemies() {
-            ISquadron newSquadron = Squadrons[Rand.Next(Squadrons.Count)];
+            int rnd = Rand.Next(Squadrons.Length);
+            ISquadron newSquadron = CreateSquadron(Squadrons[rnd]);
             MovementStrategy = MovementStrategies[Rand.Next(MovementStrategies.Count)];
             foreach (Enemy enemy in newSquadron.Enemies) {
                 Enemies.AddDynamicEntity(enemy);
             }
-
-            newSquadron.Enemies.ClearContainer();
-            newSquadron.CreateEnemies();
         }
         
-        public ISquadron CreateSquadron<SquadronType>() where SquadronType : ISquadron, new() {
-            return new SquadronType();
+        public ISquadron CreateSquadron(SquadronType type) {
+            switch (type) {
+            case(SquadronType.SquadronBox):
+                return new SquadronBox(50);
+            case(SquadronType.SquadronLine):
+                return new SquadronLine(50);
+            case(SquadronType.SquadronDiamonds):
+                return new SquadronDiamonds(50);
+            default:
+                throw new ArgumentException("Type conflict setting squadron.");
+            }
         }
         
         private void EnemyCollision() {

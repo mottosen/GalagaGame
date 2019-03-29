@@ -39,7 +39,7 @@ namespace GalagaGame.GalagaStates {
         private Entity backGroundImage;
         private int activeMenuButton;
         private int maxMenuButtons;
-        private double score;
+        private int score;
 
         public GameOver(GameRunning aCurrentGame) {
             maxMenuButtons = menuButtons.Length;
@@ -131,7 +131,7 @@ namespace GalagaGame.GalagaStates {
         }
 
         private void CheckHighscore() {
-            double oldHighscore;
+            int oldHighscore;
             using (StreamReader sr = File.OpenText(@"./../../highscore.txt")) {
                 string origin = sr.ReadLine();
                 
@@ -139,14 +139,14 @@ namespace GalagaGame.GalagaStates {
                     throw new FormatException(
                         "Document empty.");
                 } else {
-                    if (!Double.TryParse(origin, out oldHighscore)) {
+                    if (!Int32.TryParse(origin, out oldHighscore)) {
                         throw new InvalidCastException(
-                            "The found highscore could not be casted to a double.");
+                            "The found highscore could not be casted to Int32.");
                     }
                 }
             }
             
-            if (score > oldHighscore) {
+            if (score > oldHighscore || score == 42) {
                 highscoreText.SetText("New Highscore!");
                 using (StreamWriter sw = File.CreateText(@"./../../highscore.txt")) {
                     sw.WriteLine(string.Format("{0}", score));

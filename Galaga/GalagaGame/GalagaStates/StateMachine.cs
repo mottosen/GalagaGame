@@ -15,16 +15,20 @@ namespace GalagaGame.GalagaStates {
         private void SwitchState(GameStateType stateType) {
             switch (stateType) {
             case (GameStateType.GameRunning):
-                ActiveState = new GameRunning(1);
+                ActiveState = new GameRunning();
                 currentGame = ActiveState;
                 break;
             case (GameStateType.GamePaused):
                 ActiveState = new GamePaused(((GameRunning)currentGame));
                 break;
             case (GameStateType.MainMenu):
+                ((GameRunning) currentGame).Level.EndLevel();
+
                 ActiveState = MainMenu.GetInstance();
                 break;
             case (GameStateType.GameOver):
+                ((GameRunning) currentGame).Level.EndLevel();
+                
                 ActiveState = new GameOver(((GameRunning)currentGame));
                 break;
             }

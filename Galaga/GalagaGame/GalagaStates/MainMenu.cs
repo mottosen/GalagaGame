@@ -127,12 +127,19 @@ namespace GalagaGame.GalagaStates {
         }
 
         private void GetHighscore() {
-            double highscore;
-            using (StreamReader sr = File.OpenText(@"./../../highscore.txt")) {
-                string origin = sr.ReadLine();
-                if (!double.TryParse(origin, out highscore)) {
-                    throw new InvalidCastException(
-                        "The found highscore could not be casted to a double.");
+            int highscore;
+            if (File.Exists(@"./../../highscore.txt")) {
+                using (StreamReader sr = File.OpenText(@"./../../highscore.txt")) {
+                    string origin = sr.ReadLine();
+                    if (!Int32.TryParse(origin, out highscore)) {
+                        throw new InvalidCastException(
+                            "The found highscore could not be casted to a double.");
+                    }
+                }
+            } else {
+                using (StreamWriter sw = File.CreateText(@"./../../highscore.txt")) {
+                    sw.WriteLine("0");
+                    highscore = 0;
                 }
             }
             highscoreText.SetText(string.Format("Highscore: {0}", highscore));

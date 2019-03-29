@@ -5,10 +5,12 @@ using System.Security.Cryptography;
 using DIKUArcade.Entities;
 using DIKUArcade.Graphics;
 using DIKUArcade.Math;
+using GalagaGame.MovementStrategies;
 
 namespace GalagaGame.Squadrons {
     public class SquadronBox : ISquadron {
         private int strongEnemyRatio;
+        private IMovementStrategy movementStrategy;
         private Random rand = new Random();
         
         private List<Vec2F> positions = new List<Vec2F> {
@@ -29,25 +31,28 @@ namespace GalagaGame.Squadrons {
             new Vec2F(0.65f, 0.7f)
         };
 
-        public SquadronBox(int ratio) {
+        public SquadronBox(int ratio, IMovementStrategy desiredMovement) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
             // Ratio for choosing enemy strides
             strongEnemyRatio = ratio;
             
+            // The chosen movement strategy
+            movementStrategy = desiredMovement;
+            
             // Instantiate the enemies.
             CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
-        public EntityContainer<Enemy> Enemies { get; }
+        public EntityContainer<Enemy> Enemies { get; private set; }
 
         public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
                 int randNum = rand.Next(100);
                 Enemy enemy;
-                if (strongEnemyRatio <= randNum) {
+                if (strongEnemyRatio >= randNum) {
                     enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
                 } else {
                     enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
@@ -56,10 +61,34 @@ namespace GalagaGame.Squadrons {
                 Enemies.AddDynamicEntity(enemy);
             }
         }
+
+        public bool CleanEnemies() {
+            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
+            foreach (Enemy enemy in Enemies) {
+                if (enemy.IsDestroyed()) {
+                    Score.GetInstance().AddPoint(enemy.Points);
+                    enemy.DeleteEntity();
+                }
+                
+                if (!enemy.IsDeleted()) {
+                    newEnemies.AddDynamicEntity(enemy);
+                }
+            }
+
+            Enemies = newEnemies;
+            
+            // returns false if squadron is empty
+            return newEnemies.CountEntities() > 0;
+        }
+        
+        public void MoveEnemies() {
+            movementStrategy.MoveEnemies(Enemies);
+        }
     }
 
     public class SquadronLine : ISquadron {
         private int strongEnemyRatio;
+        private IMovementStrategy movementStrategy;
         private Random rand = new Random();
         
         private List<Vec2F> positions = new List<Vec2F> {
@@ -73,26 +102,28 @@ namespace GalagaGame.Squadrons {
             new Vec2F(0.8f, 0.8f)
         };
 
-
-        public SquadronLine(int ratio) {
+        public SquadronLine(int ratio, IMovementStrategy desiredMovement) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
             // Ratio for choosing enemy strides
             strongEnemyRatio = ratio;
             
+            // The chosen movement strategy
+            movementStrategy = desiredMovement;
+            
             // Instantiate the enemies.
             CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
-        public EntityContainer<Enemy> Enemies { get; }
+        public EntityContainer<Enemy> Enemies { get; private set; }
 
         public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
                 int randNum = rand.Next(100);
                 Enemy enemy;
-                if (strongEnemyRatio <= randNum) {
+                if (strongEnemyRatio >= randNum) {
                     enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
                 } else {
                     enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
@@ -101,10 +132,34 @@ namespace GalagaGame.Squadrons {
                 Enemies.AddDynamicEntity(enemy);
             }
         }
+        
+        public bool CleanEnemies() {
+            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
+            foreach (Enemy enemy in Enemies) {
+                if (enemy.IsDestroyed()) {
+                    Score.GetInstance().AddPoint(enemy.Points);
+                    enemy.DeleteEntity();
+                }
+                
+                if (!enemy.IsDeleted()) {
+                    newEnemies.AddDynamicEntity(enemy);
+                }
+            }
+
+            Enemies = newEnemies;
+            
+            // returns false if squadron is empty
+            return newEnemies.CountEntities() > 0;
+        }
+        
+        public void MoveEnemies() {
+            movementStrategy.MoveEnemies(Enemies);
+        }
     }
 
     public class SquadronDiamonds : ISquadron {
         private int strongEnemyRatio;
+        private IMovementStrategy movementStrategy;
         private Random rand = new Random();
         
         private List<Vec2F> positions = new List<Vec2F> {
@@ -134,25 +189,28 @@ namespace GalagaGame.Squadrons {
         };
 
 
-        public SquadronDiamonds(int ratio) {
+        public SquadronDiamonds(int ratio, IMovementStrategy desiredMovement) {
             // Create an empty container for the enemies.
             Enemies = new EntityContainer<Enemy>(MaxEnemies);
 
             // Ratio for choosing enemy strides
             strongEnemyRatio = ratio;
             
+            // The chosen movement strategy
+            movementStrategy = desiredMovement;
+            
             // Instantiate the enemies.
             CreateEnemies();
         }
 
         public int MaxEnemies { get; } = 0;
-        public EntityContainer<Enemy> Enemies { get; }
+        public EntityContainer<Enemy> Enemies { get; private set; }
 
         public void CreateEnemies() {
             for (var i = 0; i < positions.Count; i++) {
                 int randNum = rand.Next(100);
                 Enemy enemy;
-                if (strongEnemyRatio <= randNum) {
+                if (strongEnemyRatio >= randNum) {
                     enemy = new StrongEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
                 } else {
                     enemy = new NormalEnemy(new DynamicShape(positions[i], new Vec2F(0.1f, 0.1f)));
@@ -160,6 +218,29 @@ namespace GalagaGame.Squadrons {
                 
                 Enemies.AddDynamicEntity(enemy);
             }
+        }
+        
+        public bool CleanEnemies() {
+            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
+            foreach (Enemy enemy in Enemies) {
+                if (enemy.IsDestroyed()) {
+                    Score.GetInstance().AddPoint(enemy.Points);
+                    enemy.DeleteEntity();
+                }
+                
+                if (!enemy.IsDeleted()) {
+                    newEnemies.AddDynamicEntity(enemy);
+                }
+            }
+
+            Enemies = newEnemies;
+            
+            // returns false if squadron is empty
+            return newEnemies.CountEntities() > 0;
+        }
+        
+        public void MoveEnemies() {
+            movementStrategy.MoveEnemies(Enemies);
         }
     }
 }

@@ -12,13 +12,13 @@ namespace GalagaGame {
         public PlayerLife(StationaryShape shape, int placement) : base(shape, PlayerLife.stride) {
             switch (placement) {
                 case(1):
-                    shape.SetPosition(new Vec2F(0.01f, 0.94f));
+                    shape.SetPosition(new Vec2F(0.01f, 0.89f));
                     break;
                 case(2):
-                    shape.SetPosition(new Vec2F(0.06f, 0.94f));
+                    shape.SetPosition(new Vec2F(0.06f, 0.89f));
                     break;
                 case(3):
-                    shape.SetPosition(new Vec2F(0.11f, 0.94f));
+                    shape.SetPosition(new Vec2F(0.11f, 0.89f));
                     break;
                 default:
                     throw new ArgumentException(

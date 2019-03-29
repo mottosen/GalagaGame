@@ -13,22 +13,27 @@ namespace GalagaGame.Levels {
     public abstract class LevelAbstract {
         private Entity backGroundImage;
         
-        protected Random Rand = new Random(); 
-
+        protected Random Rand = new Random();
+        
         // Enemies
-        protected double EnemySpeed;
-        protected EntityContainer<Enemy> Enemies = new EntityContainer<Enemy>(0);
-        protected List<IMovementStrategy> MovementStrategies = new List<IMovementStrategy>();
-        protected IMovementStrategy MovementStrategy = new MovementStrategyNoMove();
-
-        public enum SquadronType {
-            SquadronBox,
-            SquadronLine,
-            SquadronDiamonds
+        protected float EnemySpeed;
+        protected int StrongEnemyRatio;
+        protected List<ISquadron> Enemies = new List<ISquadron>();
+        protected SquadronTypes[] PossibleSquadrons;
+        protected MovementTypes[] PossibleMovements;
+        
+        protected enum SquadronTypes {
+            Box,
+            Line,
+            Diamonds
         }
         
-        protected SquadronType[] Squadrons = (SquadronType[])Enum.GetValues(typeof(SquadronType));
-    
+        protected enum MovementTypes {
+            NoMove,
+            Down,
+            ZigZag
+        }
+        
         // Explosions
         private List<Image> explosionStrides;
         private AnimationContainer explosions;
@@ -60,9 +65,6 @@ namespace GalagaGame.Levels {
         }
 
         public void Update() {
-            if (playerLives.IsEmpty()) {
-                GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, playerLives);
-            }
             UpdatePlayer();
             UpdateShots();
             UpdateEnemies();
@@ -72,14 +74,20 @@ namespace GalagaGame.Levels {
         public void Render() {
             backGroundImage.RenderEntity();
             player.RenderEntity();
-            Enemies.RenderEntities();
+            foreach (var squadron in Enemies) {
+                squadron.Enemies.RenderEntities();
+            }
 
             playerShots.RenderEntities();
-
             playerLives.Render();
 
             explosions.RenderAnimations();
             Score.GetInstance().RenderScore();
+        }
+
+        public void EndLevel() {
+            GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, player);
+            GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, playerLives);
         }
         
         private void UpdatePlayer() {
@@ -92,18 +100,20 @@ namespace GalagaGame.Levels {
                 if (!shot.IsDeleted()) {
                     shot.Move();
                     newPlayerShots.AddDynamicEntity(shot);
-                } 
+                }
 
-                foreach (Enemy enemy in Enemies) {
-                    CollisionData collision =
-                        CollisionDetection.Aabb(
-                            shot.Shape.AsDynamicShape(), 
-                            enemy.Shape.AsDynamicShape());
-                    if (collision.Collision && !shot.IsDeleted()) {
-                        shot.DeleteEntity();
-                        enemy.Hit();
-                        AddExplosion(enemy.Shape.Position.X, enemy.Shape.Position.Y,
-                            enemy.Shape.Extent.X, enemy.Shape.Extent.Y);
+                foreach (ISquadron squadron in Enemies) {
+                    foreach (Enemy enemy in squadron.Enemies) {
+                        CollisionData collision =
+                            CollisionDetection.Aabb(
+                                shot.Shape.AsDynamicShape(), 
+                                enemy.Shape.AsDynamicShape());
+                        if (collision.Collision && !shot.IsDeleted()) {
+                            shot.DeleteEntity();
+                            enemy.Hit();
+                            AddExplosion(enemy.Shape.Position.X, enemy.Shape.Position.Y,
+                                enemy.Shape.Extent.X, enemy.Shape.Extent.Y);
+                        }
                     }
                 }
             });
@@ -112,53 +122,61 @@ namespace GalagaGame.Levels {
         }
         
         private void UpdateEnemies() {
-            EntityContainer<Enemy> newEnemies = new EntityContainer<Enemy>();
-            foreach (Enemy enemy in Enemies) {
-                if (enemy.IsDestroyed()) {
-                    Score.GetInstance().AddPoint(enemy.Points);
-                    enemy.DeleteEntity();
-                }
-                
-                if (!enemy.IsDeleted()) {
-                    newEnemies.AddDynamicEntity(enemy);
-                }
-            }
-
-            Enemies = newEnemies;
-            
-            if (Enemies.CountEntities() == 0) {
+            List<ISquadron> newEnemies = new List<ISquadron>();
+            if (Enemies.Count == 0) {
                 playerShots = new EntityContainer<PlayerShot>();
                 AddEnemies();
             }
             
-            MovementStrategy.MoveEnemies(Enemies);
-            EnemyCollision();
-        }
-        
-        public void AddEnemies() {
-            int rnd = Rand.Next(Squadrons.Length);
-            ISquadron newSquadron = CreateSquadron(Squadrons[rnd]);
-            MovementStrategy = MovementStrategies[Rand.Next(MovementStrategies.Count)];
-            foreach (Enemy enemy in newSquadron.Enemies) {
-                Enemies.AddDynamicEntity(enemy);
+            foreach (ISquadron squadron in Enemies) {
+                // only works on non empty squadrons
+                if (squadron.CleanEnemies()) {
+                    newEnemies.Add(squadron);
+                    squadron.MoveEnemies();
+                    EnemyCollision(squadron.Enemies);
+                }
             }
+            
+            Enemies = newEnemies;
         }
         
-        public ISquadron CreateSquadron(SquadronType type) {
-            switch (type) {
-            case(SquadronType.SquadronBox):
-                return new SquadronBox(50);
-            case(SquadronType.SquadronLine):
-                return new SquadronLine(50);
-            case(SquadronType.SquadronDiamonds):
-                return new SquadronDiamonds(50);
+        private void AddEnemies() {
+            int rnd = Rand.Next(PossibleSquadrons.Length);
+            ISquadron newSquadron = GetSquadron(PossibleSquadrons[rnd]);
+            Enemies.Add(newSquadron);
+        }
+        
+        private ISquadron GetSquadron(SquadronTypes desiredSquadron) {
+            IMovementStrategy chosenMovement =
+                GetMovement(PossibleMovements[Rand.Next(PossibleMovements.Length)]);
+
+            switch (desiredSquadron) {
+            case(SquadronTypes.Box):
+                return new SquadronBox(StrongEnemyRatio, chosenMovement);
+            case(SquadronTypes.Line):
+                return new SquadronLine(StrongEnemyRatio, chosenMovement);
+            case(SquadronTypes.Diamonds):
+                return new SquadronDiamonds(StrongEnemyRatio, chosenMovement);
             default:
                 throw new ArgumentException("Type conflict setting squadron.");
             }
         }
         
-        private void EnemyCollision() {
-            Enemies.Iterate(delegate(Enemy enemy) {
+        private IMovementStrategy GetMovement(MovementTypes desiredMovement) {
+            switch (desiredMovement) {
+            case(MovementTypes.NoMove):
+                return new MovementStrategyNoMove();
+            case(MovementTypes.Down):
+                return new MovementStrategyDown(EnemySpeed);
+            case(MovementTypes.ZigZag):
+                return new MovementStrategyZigZagDown(EnemySpeed);
+            default:
+                throw new ArgumentException("Type conflict setting movement.");
+            }
+        }
+        
+        private void EnemyCollision(EntityContainer<Enemy> squadron) {
+            squadron.Iterate(delegate(Enemy enemy) {
                 if (CollisionDetection.Aabb(player.Shape.AsDynamicShape(), enemy.Shape).Collision) {
                     enemy.DeleteEntity();
                     GalagaBus.GetBus().RegisterEvent(

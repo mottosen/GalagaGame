@@ -58,6 +58,7 @@
     <Compile Include="GameLogic\Score.cs" />
     <Compile Include="Levels\LevelAbstract.cs" />
     <Compile Include="Levels\Level_1.cs" />
+    <Compile Include="Levels\Level_2.cs" />
     <Compile Include="MovementStrategies\IMovementStrategy.cs" />
     <Compile Include="MovementStrategies\MovementStrategies.cs" />
     <Compile Include="Program.cs" />

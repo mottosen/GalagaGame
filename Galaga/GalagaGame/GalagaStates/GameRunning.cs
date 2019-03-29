@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Security.Policy;
 using DIKUArcade.Entities;
@@ -14,18 +15,30 @@ using GalagaGame.Squadrons;
 
 namespace GalagaGame.GalagaStates {
     public class GameRunning : IGameState {
-        private LevelAbstract level;
-        private int desiredLevel;
+        public LevelAbstract Level { get; private set; }
         private int pointsToNextLevel;
         private int levelIndex;
+        private Text levelText = new Text(
+            "",
+            new Vec2F(0.01f, -0.01f), 
+            new Vec2F(1f, 1f));
+
+        private Text LevelText {
+            get {
+                levelText.SetText(string.Format("Level: {0}", levelIndex + 1));
+                return levelText;
+            }
+        }
+
+        public GameRunning() {
+            levelText.SetColor(Color.WhiteSmoke);
+            levelText.SetFontSize(15);
+        }
         
         private List<LevelAbstract> levels = new List<LevelAbstract>() {
-            new Level_1()
+            new Level_1(),
+            new Level_2()
         };
-        
-        public GameRunning(int theDesiredLevel) {
-            desiredLevel = theDesiredLevel;
-        }
         
         public void GameLoop() {
             throw new System.NotImplementedException();
@@ -33,28 +46,31 @@ namespace GalagaGame.GalagaStates {
 
         public void InitializeGameState() {
             Score.GetInstance().ResetScore();
-            level = levels[0];
+            Level = levels[0];
             pointsToNextLevel = 20000;
         }
 
         public void UpdateGameLogic() {
             if (Score.GetInstance().GetScore() >= pointsToNextLevel) {
-                //NextLevel();
+                NextLevel();
             }
-            level.Update();
+            Level.Update();
         }
 
         public void RenderState() {
-            level.Render();
+            Level.Render();
+            LevelText.RenderText();
         }
 
         public LevelAbstract GetLevel() {
-            return level;
+            return Level;
         }
 
         private void NextLevel() {
+            Level.EndLevel();
             levelIndex++;
-            level = levels[levelIndex];
+            Level = levels[levelIndex];
+            pointsToNextLevel = 1000000;
         }
         
         public void HandleKeyEvent(string keyValue, string keyAction) {
@@ -85,7 +101,7 @@ namespace GalagaGame.GalagaStates {
                             "RIGHT", ""));
                     break;
                 case "KEY_SPACE":
-                    level.AddShot();
+                    Level.AddShot();
                     break;
                 case "KEY_F":
                     GalagaBus.GetBus().RegisterEvent(

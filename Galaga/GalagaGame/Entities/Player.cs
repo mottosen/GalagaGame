@@ -55,7 +55,6 @@ namespace GalagaGame {
         }
         
         private void Die() {
-            GalagaBus.GetBus().Unsubscribe(GameEventType.PlayerEvent, this);
             GalagaBus.GetBus().RegisterEvent(
                 GameEventFactory<object>.CreateGameEventForAllProcessors(
                     GameEventType.GameStateEvent,

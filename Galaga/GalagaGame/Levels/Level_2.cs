@@ -1,23 +1,19 @@
-using System;
-using GalagaGame.MovementStrategies;
-using GalagaGame.Squadrons;
-
 namespace GalagaGame.Levels {
-    public class Level_1 : LevelAbstract {
-        public Level_1() {
+    public class Level_2 : LevelAbstract {
+        public Level_2() {
             EnemySpeed = 0.001f;
-            StrongEnemyRatio = 0;
+            StrongEnemyRatio = 20;
             
             // Squadrons
             PossibleSquadrons = new [] {
                 SquadronTypes.Box,
-                SquadronTypes.Line
+                SquadronTypes.Diamonds
             };
             
             // Movement Strategies
             PossibleMovements = new[] {
                 MovementTypes.NoMove,
-                MovementTypes.Down
+                MovementTypes.ZigZag
             };
         }
     }

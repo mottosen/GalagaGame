@@ -35,7 +35,12 @@ namespace GalagaGame.GalagaStates {
 
         public GamePaused(GameRunning aCurrentGame) {
             if (Score.GetInstance().TrueVictory()) {
-                Console.WriteLine("ez win!");
+                GalagaBus.GetBus().RegisterEvent(
+                    GameEventFactory<object>.CreateGameEventForAllProcessors(
+                        GameEventType.GameStateEvent,
+                        this,
+                        "CHANGE_STATE",
+                        "GAME_OVER", ""));;
             }
             currentGame = aCurrentGame;
             maxMenuButtons = menuButtons.Length;
